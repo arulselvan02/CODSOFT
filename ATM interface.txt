@@ -1,0 +1,150 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+class BankAccount {
+    private String userName;
+    private String accountNumber;
+    private double balance;
+
+    public BankAccount(String userName, String accountNumber, double initialBalance) {
+        this.userName = userName;
+        this.accountNumber = accountNumber;
+        this.balance = initialBalance;
+    }
+
+    public String getUserName() {
+        return userName;
+    }
+
+    public String getAccountNumber() {
+        return accountNumber;
+    }
+
+    public double getBalance() {
+        return balance;
+    }
+
+    public void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            JOptionPane.showMessageDialog(null, "Deposit successful. New balance: $" + balance);
+        } else {
+            JOptionPane.showMessageDialog(null, "Invalid deposit amount.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public void withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            JOptionPane.showMessageDialog(null, "Withdrawal successful. New balance: $" + balance);
+        } else {
+            JOptionPane.showMessageDialog(null, "Invalid withdrawal amount or insufficient balance.", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}
+
+class ATMGUI extends JFrame {
+
+    private BankAccount userAccount;
+    private JTextField depositField;
+    private JTextField withdrawField;
+
+    public ATMGUI(BankAccount account) {
+        super("ATM GUI");
+
+        this.userAccount = account;
+
+        setLayout(new BorderLayout());
+
+        JLabel nameLabel = new JLabel("Welcome, " + userAccount.getUserName());
+        add(nameLabel, BorderLayout.NORTH);
+
+        JPanel optionsPanel = new JPanel(new GridLayout(4, 1));
+
+        JButton checkBalanceButton = new JButton("Check Balance");
+        JButton depositButton = new JButton("Deposit");
+        JButton withdrawButton = new JButton("Withdraw");
+        JButton displayInfoButton = new JButton("Display Account Information");
+
+        optionsPanel.add(checkBalanceButton);
+        optionsPanel.add(depositButton);
+        optionsPanel.add(withdrawButton);
+        optionsPanel.add(displayInfoButton);
+
+        add(optionsPanel, BorderLayout.CENTER);
+
+        depositField = new JTextField(10);
+        withdrawField = new JTextField(10);
+
+        JPanel transactionPanel = new JPanel(new FlowLayout());
+        transactionPanel.add(new JLabel("Deposit Amount:"));
+        transactionPanel.add(depositField);
+        transactionPanel.add(new JLabel("Withdrawal Amount:"));
+        transactionPanel.add(withdrawField);
+
+        add(transactionPanel, BorderLayout.SOUTH);
+
+        checkBalanceButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Current Balance: $" + userAccount.getBalance());
+            }
+        });
+
+        depositButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    double depositAmount = Double.parseDouble(depositField.getText());
+                    userAccount.deposit(depositAmount);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid deposit amount.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        withdrawButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    double withdrawalAmount = Double.parseDouble(withdrawField.getText());
+                    userAccount.withdraw(withdrawalAmount);
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Invalid withdrawal amount.", "Error", JOptionPane.ERROR_MESSAGE);
+                }
+            }
+        });
+
+        displayInfoButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null, "Account Information:\n" +
+                        "User Name: " + userAccount.getUserName() + "\n" +
+                        "Account Number: " + userAccount.getAccountNumber() + "\n" +
+                        "Current Balance: $" + userAccount.getBalance());
+            }
+        });
+    }
+}
+
+public class ATMGUIApp {
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                String userName = JOptionPane.showInputDialog("Enter your name:");
+                String accountNumber = JOptionPane.showInputDialog("Enter your account number:");
+                double initialBalance = Double.parseDouble(JOptionPane.showInputDialog("Enter initial account balance: $"));
+
+                BankAccount userAccount = new BankAccount(userName, accountNumber, initialBalance);
+                ATMGUI atmGUI = new ATMGUI(userAccount);
+
+                atmGUI.setSize(400, 200);
+                atmGUI.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                atmGUI.setVisible(true);
+            }
+        });
+    }
+}
