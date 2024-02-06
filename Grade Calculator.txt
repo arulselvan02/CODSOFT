@@ -1,0 +1,100 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class GradeCalculatorGUI extends JFrame {
+
+    private final JTextField[] subjectFields;
+    private final JButton calculateButton;
+    private final JTextArea resultArea;
+
+    public GradeCalculatorGUI() {
+        super("Grade Calculator");
+
+        setLayout(new FlowLayout());
+
+        subjectFields = new JTextField[5];
+        for (int i = 0; i < subjectFields.length; i++) {
+            subjectFields[i] = new JTextField(5);
+            add(new JLabel("Subject " + (i + 1) + ": "));
+            add(subjectFields[i]);
+        }
+
+        calculateButton = new JButton("Calculate");
+        resultArea = new JTextArea(10, 30);
+        resultArea.setEditable(false);
+
+        add(calculateButton);
+        add(new JScrollPane(resultArea));
+
+        calculateButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                calculateAndDisplayResults();
+            }
+        });
+    }
+
+    private void calculateAndDisplayResults() {
+        int[] subjectMarks = new int[5];
+        for (int i = 0; i < subjectMarks.length; i++) {
+            try {
+                subjectMarks[i] = Integer.parseInt(subjectFields[i].getText());
+                if (subjectMarks[i] < 0 || subjectMarks[i] > 100) {
+                    throw new NumberFormatException();
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(this, "Please enter valid marks (0-100) for all subjects.", "Input Error", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+        }
+
+        int totalMarks = calculateTotalMarks(subjectMarks);
+        double averagePercentage = (double) totalMarks / (subjectMarks.length * 100) * 100;
+        char grade = calculateGrade(averagePercentage);
+
+        resultArea.setText("Results:\n");
+        resultArea.append("Your performance in " + subjectMarks.length + " subjects is as follows:\n");
+        for (int i = 0; i < subjectMarks.length; i++) {
+            resultArea.append("Subject " + (i + 1) + ": " + subjectMarks[i] + " marks\n");
+        }
+        resultArea.append("\nTotal Marks: " + totalMarks + "\n");
+        resultArea.append("Average Percentage: " + averagePercentage + "%\n");
+        resultArea.append("Your Grade: " + grade);
+    }
+
+    private int calculateTotalMarks(int[] subjectMarks) {
+        int totalMarks = 0;
+        for (int marks : subjectMarks) {
+            totalMarks += marks;
+        }
+        return totalMarks;
+    }
+
+    private char calculateGrade(double averagePercentage) {
+        if (averagePercentage >= 90) {
+            return 'A';
+        } else if (averagePercentage >= 80) {
+            return 'B';
+        } else if (averagePercentage >= 70) {
+            return 'C';
+        } else if (averagePercentage >= 60) {
+            return 'D';
+        } else {
+            return 'F';
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                GradeCalculatorGUI gui = new GradeCalculatorGUI();
+                gui.setSize(400, 300);
+                gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                gui.setVisible(true);
+            }
+        });
+    }
+}
