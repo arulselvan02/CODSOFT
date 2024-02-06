@@ -1,0 +1,102 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Random;
+
+public class funnumberguessing extends JFrame {
+
+    private final JTextField guessField;
+    private final JButton guessButton;
+    private final JTextArea resultArea;
+
+    private final Random random = new Random();
+    private int generatedNumber;
+    private int attempts;
+    private final int maxAttempts = 10;
+    private int roundScore;
+
+    public funnumberguessing() {
+        super("Enhanced Number Guessing Game");
+
+        setLayout(new FlowLayout());
+
+        generatedNumber = generateRandomNumber();
+
+        JLabel promptLabel = new JLabel("Guess a number between 1 and 100:");
+        guessField = new JTextField(10);
+        guessButton = new JButton("Guess");
+        resultArea = new JTextArea(10, 30);
+
+        add(promptLabel);
+        add(guessField);
+        add(guessButton);
+        add(resultArea);
+
+        guessButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                processGuess();
+            }
+        });
+    }
+
+    private int generateRandomNumber() {
+        return random.nextInt(100) + 1;
+    }
+
+    private void processGuess() {
+        if (attempts < maxAttempts) {
+            int userGuess = Integer.parseInt(guessField.getText());
+            attempts++;
+
+            if (userGuess == generatedNumber) {
+                roundScore = maxAttempts - attempts + 1;
+                displayResult("Congratulations! You guessed the correct number in " + attempts + " attempts. 🎉");
+            } else if (userGuess < generatedNumber) {
+                displayResult("Too low. Try again! 🔽");
+            } else {
+                displayResult("Too high. Try again! 🔼");
+            }
+
+            if (attempts == 3 && userGuess != generatedNumber) {
+                displayResult("Hint: The number is " + (generatedNumber % 2 == 0 ? "even." : "odd."));
+            }
+        }
+
+        if (attempts == maxAttempts || roundScore > 0) {
+            displayRoundSummary();
+            resetGame();
+        }
+    }
+
+    private void displayResult(String message) {
+        resultArea.append(message + "\n");
+        resultArea.setCaretPosition(resultArea.getDocument().getLength());
+    }
+
+    private void displayRoundSummary() {
+        displayResult("\nRound Summary:");
+        displayResult("Your Score for this round: " + roundScore + " 🌟");
+    }
+
+    private void resetGame() {
+        generatedNumber = generateRandomNumber();
+        attempts = 0;
+        roundScore = 0;
+
+        displayResult("\nNew Round! Guess a number between 1 and 100:");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                funnumberguessing game = new funnumberguessing();
+                game.setSize(400, 300);
+                game.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                game.setVisible(true);
+            }
+        });
+    }
+}
